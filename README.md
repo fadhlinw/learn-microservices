@@ -41,4 +41,17 @@ and next
 ```
 go run main.go
 ```
+### 4. Run With Docker Compose
+
+If you want to run using a Docker
+
+```
+docker-compose build
+```
+
+and then
+
+```
+docker-compose up
+```
 
