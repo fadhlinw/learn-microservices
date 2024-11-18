@@ -1,12 +1,49 @@
-version: '3'
+version: "3.8"
+
 services:
-    redis:
-      image: redis:alpine
-      ports:
-        - '6379:6379'
-    nats:
-      image: nats:latest
-      ports:
-        - '4222:4222'
-        - '6222:6222'
-        - '8222:8222'
+  # Books service
+  books-service:
+    build:
+      context: ./services/books-service
+    container_name: books-service
+    ports:
+      - "8081:8081"  # Expose the port used by gRPC
+    restart: unless-stopped  # Optional: Restart the service if it fails
+    networks:
+      - microservices-network
+    depends_on:
+      - redis  # Assuming using Redis in the service, adjust accordingly
+
+  # Client service that handles REST requests and forwards to gRPC services
+  client:
+    build:
+      context: ./src  # Assuming the client is in the 'src' folder
+    container_name: client
+    ports:
+      - "8080:8080"  # REST API client port
+    networks:
+      - microservices-network
+    depends_on:
+      - books-service  # Ensure client waits for the service to be available
+
+  # Example of a shared service like Redis (if needed)
+  redis:
+    image: redis:alpine
+    container_name: redis
+    networks:
+      - microservices-network
+
+  # Example of a shared service like NATS
+  nats:
+    image: nats:latest
+    container_name: nats
+    ports:
+      - "4222:4222"
+      - "6222:6222"
+      - "8222:8222"
+    networks:
+      - microservices-network
+
+networks:
+  microservices-network:
+    driver: bridge

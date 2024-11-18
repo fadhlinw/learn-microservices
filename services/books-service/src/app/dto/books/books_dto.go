@@ -31,6 +31,7 @@ type GetBooksRespDTO struct {
 }
 
 type WorkDTO struct {
+	ID           int          `json:"id"`
 	Title        string       `json:"title"`
 	CoverID      int64        `json:"cover_id"`
 	EditionCount int64        `json:"edition_count"`
@@ -42,13 +43,13 @@ type AuthorDTO struct {
 }
 
 func TransformDTOToProto(dto *GetBooksRespDTO) (*booksProto.BookResp, error) {
-	// Buat instansi BookResp protobuf
+	// Create protobuf response
 	protoResp := &booksProto.BookResp{
 		Name:        dto.Name,
 		SubjectType: dto.SubjectType,
 	}
 
-	// Iterasi melalui Works DTO dan transformasi ke Work protobuf
+	// Iteration within Works and transform to Work protobuf
 	for _, work := range dto.Works {
 		protoWork := &booksProto.Work{
 			Title:        work.Title,
@@ -56,7 +57,7 @@ func TransformDTOToProto(dto *GetBooksRespDTO) (*booksProto.BookResp, error) {
 			EditionCount: work.EditionCount,
 		}
 
-		// Iterasi melalui Authors dalam Work dan transformasi ke Author protobuf
+		// Iteration within Authors and transform to Author protobuf
 		for _, author := range work.Authors {
 			protoAuthor := &booksProto.Author{
 				Name: author.Name,

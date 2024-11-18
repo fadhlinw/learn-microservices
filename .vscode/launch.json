@@ -5,9 +5,9 @@
       "name": "Launch Go Program",
       "type": "go",
       "request": "launch",
-      "mode": "auto", // 'auto' will automatically detect the mode (e.g., `debug` or `test`)
-      "program": "${workspaceFolder}/main.go", // Mengarah ke main.go yang menjadi entry point aplikasi mikroservis Anda
-      "args": [] // Opsi: argumen yang ingin dikirimkan ke program (kosong jika tidak ada)
+      "mode": "auto",
+      "program": "${workspaceFolder}/main.go",
+      "args": []
     }
   ]
 }

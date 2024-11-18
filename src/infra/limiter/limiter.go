@@ -5,7 +5,6 @@ import "golang.org/x/time/rate"
 // RateLimiter interface represents the rate limiter behavior.
 type RateLimiterInterface interface {
 	Allow() bool
-	//bisa ditambahkan yang lain nantinya
 }
 
 // RealRateLimiter implements RateLimiter using the real rate limiter logic.

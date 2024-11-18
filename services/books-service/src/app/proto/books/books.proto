@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+option go_package = "proto/books";
+
+package books;
+
+
+message BookReq {
+    string subject=1;
+}
+
+message BookResp {
+    string name =1;
+	string subject_type=2;
+	repeated Work works=3;
+}
+
+message Work {
+    string title=1;
+    int64 cover_id=2;
+    int64 edition_count=3;
+    repeated Author authors=4;
+}
+
+message Author  {
+	string name=1;
+}
+service BookService {
+    rpc Book(BookReq) returns (BookResp) {}
+}
+
+// create proto :
+// protoc -I=src/app/proto/ --go_out=src/app/proto/ --go_opt=paths=source_relative 
+// --go-grpc_out=src/app/proto/ --go-grpc_opt=paths=source_relative src/app/proto/books/books.proto
+
+// protoc:
+
+// This is the command to run the Protocol Buffers compiler.
+// -I=src/app/proto/:
+
+// -I indicates the directory that will be used as the root to find .proto files.
+// src/app/proto/ is the directory where the .proto file is located.
+// --go_out=src/app/proto/:
+
+// --go_out specifies the output directory for the generated Go file.
+// src/app/proto/ is the directory where Go files will be generated.
+// --go_opt=paths=source_relative:
+
+// --go_opt is an additional option to --go_out.
+// paths=source_relative instructs the compiler to save the generated Go file relative to the location of the .proto file.
+// --go-grpc_out=src/app/proto/:
+
+// --go-grpc_out specifies the output directory for the generated Go gRPC file.
+// src/app/proto/ is the directory where Go gRPC files will be generated.
+// --go-grpc_opt=paths=source_relative:
+
+// --go-grpc_opt is an additional option to --go-grpc_out.
+// paths=source_relative instructs the compiler to save the generated Go gRPC file relative to the location of the .proto file.
+// src/app/proto/books/books.proto:
+
+// This is the path of the .proto file to be compiled.

@@ -1,6 +1,8 @@
 package server
 
 import (
+	"database/sql"
+	"learn-microservices-server/db" // Import your db package
 	"learn-microservices-server/src/infra/config"
 	"learn-microservices-server/src/infra/persistence/redis"
 	handler "learn-microservices-server/src/interface/grpc/handlers"
@@ -12,25 +14,22 @@ import (
 	"learn-microservices-server/src/infra/broker/nats"
 	pickUpNats "learn-microservices-server/src/infra/broker/nats/consumer/pickup"
 	natsPublisher "learn-microservices-server/src/infra/broker/nats/publisher"
-	circuit_breaker_service "learn-microservices-server/src/infra/circuit_breaker"
 	bookInteg "learn-microservices-server/src/infra/integration/books"
 	ms_log "learn-microservices-server/src/infra/log"
 	redisService "learn-microservices-server/src/infra/persistence/redis/service"
-	// sentryClient "learn-microservices-server/src/infra/sentry_init"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
-// Server is struct to hold any dependencies used for server
 type Server struct {
 	config *config.Config
+	db     *sql.DB // Add db as a field in the server struct
 }
 
 type ServerGrpcOption func(*Server)
 
 // NewGRPCServer is constructor
-// func NewGRPCServer(conf *config.Config, repo *service.Repositories) *Server {
 func NewGRPCServer(options ...ServerGrpcOption) *Server {
 	server := &Server{}
 
@@ -55,23 +54,29 @@ func (s *Server) Run(port int) error {
 		ms_log.IsProduction(false),
 		ms_log.LogAdditionalFields(m))
 
+	// Initialize PostgreSQL connection
+	// Use the db package to connect to the database
+	db, err := db.ConnectDB() 
+	if err != nil {
+		logger.WithField("error", err).Fatal("Failed to connect to database")
+	}
+	// Set the db connection in the server struct
+	s.db = db 
+
+	// Ensure the database connection is closed when server shuts down
+	defer db.Close()
+
 	redisClient, err := redis.NewRedisClient(s.config.Redis, logger)
 	if err != nil {
 		logger.WithField("error", err).Fatal("Failed to initialize redis client")
 	}
 	redisSvc := redisService.NewServRedis(redisClient)
-	// err = sentryClient.NewSentryClient(s.config.Sentry, logger)
-	// if err != nil {
-	// 	logger.WithField("error", err).Fatal("Failed to initialize Sentry")
-	// }
 
-	circuitBreaker := circuit_breaker_service.NewCircuitBreakerInstance()
-	bookIntegration := bookInteg.NewIntegOpenLibrary(circuitBreaker)
+	// Pass db to book integration
+	bookIntegration := bookInteg.NewIntegOpenLibrary(s.db)
 
 	Nats := nats.NewNats(s.config.Nats, logger)
 	publisher := natsPublisher.NewPushWorker(Nats)
-	// HTTP Handler
-	// the server already implements a graceful shutdown.
 
 	allUC := usecases.AllUseCases{
 		BookUC:   bookUC.NewBooksUseCase(bookIntegration, redisSvc),
