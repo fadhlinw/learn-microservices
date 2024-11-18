@@ -25,7 +25,7 @@ setup your .env from example
 
 Services Provides backend services via gRPC, processes requests from clients, and returns responses, running on port 8081.
 ```
-cd learn-microservices/services
+cd learn-microservices/services/books-service
 ```
 and next 
 ```
